@@ -3,14 +3,10 @@ quick_backup_multi:
     ------ {1} v{2} ------
     一个支持多槽位的快速§a备份§r&§c回档§r插件
     §d【格式说明】§r
-    §7{0}§r 显示帮助信息
-    §7{0} make §e[<cmt>]§r 创建一个储存至槽位§61§r的§a备份§r。§e<cmt>§r为可选注释
-    §7{0} back §6[<slot>]§r §c回档§r为槽位§6<slot>§r的存档。默认为槽位§61§r
-    §7{0} del §6<slot>§r §c删除§r槽位§6<slot>§r的存档
-    §7{0} rename §6<slot>§r §e<cmt>§r §b修改§r槽位§6<slot>§r的注释，即重命名这一槽位
-    §7{0} confirm§r 再次确认是否进行§c回档§r
-    §7{0} abort§r 在任何时候键入此指令可中断§c回档§r
-    §7{0} list§r 显示各槽位的存档信息
+    §7{0}§r 开始重启服务器
+    §7{0} confirm§r 再次确认是否进行§c重启§r
+    §7{0} abort§r 在任何时候键入此指令可中断§c重启§r
+    §7{0} help§r 显示帮助信息
     §7{0} reload§r 重新加载配置文件
     当§6<slot>§r未被指定时默认选择槽位§61§r
 
@@ -45,20 +41,20 @@ quick_backup_multi:
     success: §a备份§r完成，耗时§6{0}§r秒
     fail: §a备份§r失败，错误代码{0}
 
-  restore_backup:
-    echo_action: 准备将存档恢复至槽位§6{0}§r，{1}
-    confirm_hint: 使用§7{0} confirm§r 确认§c回档§r
+  restart:
+    echo_action: 准备重新启动服务器
+    confirm_hint: 使用§7{0} confirm§r 确认§c重启§r
     confirm_hover: 点击确认
     abort_hint: §7{0} abort§r 取消
     abort_hover: 点击取消
 
   confirm_restore.nothing_to_confirm: 没有什么需要确认的
 
-  do_restore:
-    countdown.intro: 10秒后关闭服务器§c回档§r
-    countdown.text: 还有{0}秒，将§c回档§r为槽位§6{1}§r，{2}
-    countdown.hover: 点击终止回档！
-    abort: §c回档§r被中断！
+  do_restart:
+    countdown.intro: 10秒后§c重启服务器§r
+    countdown.text: 还有{0}秒，将§c重启服务器§r
+    countdown.hover: 点击终止重启！
+    abort: §c重启§r被中断！
 
   trigger_abort.abort: 终止操作！
 
@@ -77,10 +73,10 @@ quick_backup_multi:
       text: ">>> §a点我创建一个备份§r <<<"
       hover: 记得修改注释
       command: "{0} make 我是一个注释"
-    click_to_restore:
-      text: ">>> §c点我回档至最近的备份§r <<<"
-      hover: 也就是回档至第一个槽位
-      command: "{0} back"
+    click_to_restart:
+      text: ">>> §c点我重启服务器§r <<<"
+      hover: 很纯粹，就是把服务器关掉重开一遍
+      command: "{0}"
 
   unknown_command:
     text: 参数错误！请输入§7{0}§r以获取插件信息
@@ -89,5 +85,5 @@ quick_backup_multi:
     permission_denied: 权限不足
     wrong_slot: 槽位输入错误
   register:
-    summory_help: §a备份§r/§c回档§r，§6{0}§r槽位
-    show_help: 点击查看帮助信息
+    summory_help: §c自动重启服务器§r
+    show_help: 点击立刻重启
