@@ -40,7 +40,7 @@ def command_run(message: Any, text: Any, command: str) -> RTextBase:
 	fancy_text = message.copy() if isinstance(message, RTextBase) else RText(message)
 	return fancy_text.set_hover_text(text).set_click_event(RAction.run_command, command)
 
-
+'''
 def copy_worlds(src: str, dst: str):
 	for world in config.world_names:
 		src_path = os.path.join(src, world)
@@ -172,7 +172,7 @@ def create_slot_info(comment: Optional[str]) -> dict:
 def write_slot_info(slot_path: str, slot_info: dict):
 	with open(os.path.join(slot_path, 'info.json'), 'w', encoding='utf8') as f:
 		json.dump(slot_info, f, indent=4, ensure_ascii=False)
-
+'''
 
 def single_op(name: RTextBase):
 	def wrapper(func: Callable):
@@ -191,7 +191,7 @@ def single_op(name: RTextBase):
 		return wrap
 	return wrapper
 
-
+'''
 @new_thread('QBM - delete')
 @single_op(tr('operations.delete'))
 def delete_backup(source: CommandSource, slot: int):
@@ -320,8 +320,9 @@ def _create_backup(source: CommandSource, comment: Optional[str]):
 		if config.turn_off_auto_save:
 			source.get_server().execute('save-on')
 
-
-def restore_backup(source: CommandSource, slot: int):
+'''
+def restart(source: CommandSource):
+	'''
 	ret = slot_check(source, slot)
 	if ret is None:
 		return
@@ -330,49 +331,44 @@ def restore_backup(source: CommandSource, slot: int):
 	global slot_selected, abort_restore
 	slot_selected = slot
 	abort_restore = False
-	print_message(source, tr('restore_backup.echo_action', slot, format_slot_info(info_dict=slot_info)), tell=False)
+	'''
+	print_message(source, tr('restart.echo_action', tell=False)
 	print_message(
 		source,
-		command_run(tr('restore_backup.confirm_hint', Prefix), tr('restore_backup.confirm_hover'), '{0} confirm'.format(Prefix))
+		command_run(tr('restart.confirm_hint', Prefix), tr('restart.confirm_hover'), '{0} confirm'.format(Prefix))
 		+ ', '
-		+ command_run(tr('restore_backup.abort_hint', Prefix), tr('restore_backup.abort_hover'), '{0} abort'.format(Prefix))
+		+ command_run(tr('restart.abort_hint', Prefix), tr('restart.abort_hover'), '{0} abort'.format(Prefix))
 		, tell=False
 	)
 
 
 @new_thread('QBM - restore')
 def confirm_restore(source: CommandSource):
-	global slot_selected
-	if slot_selected is None:
-		print_message(source, tr('confirm_restore.nothing_to_confirm'), tell=False)
-	else:
-		slot = slot_selected
-		slot_selected = None
-		_do_restore_backup(source, slot)
+	_do_restart(source)
 
 
-@single_op(tr('operations.restore'))
-def _do_restore_backup(source: CommandSource, slot: int):
+@single_op(tr('operations.restart'))
+def _do_restart(source: CommandSource):
 	try:
-		print_message(source, tr('do_restore.countdown.intro'), tell=False)
+		print_message(source, tr('do_restart.countdown.intro'), tell=False)
 		slot_info = get_slot_info(slot)
 		for countdown in range(1, 10):
 			print_message(source, command_run(
-				tr('do_restore.countdown.text', 10 - countdown, slot, format_slot_info(info_dict=slot_info)),
-				tr('do_restore.countdown.hover'),
+				tr('do_restart.countdown.text', 10 - countdown),
+				tr('do_restart.countdown.hover'),
 				'{} abort'.format(Prefix)
 			), tell=False)
 			for i in range(10):
 				time.sleep(0.1)
 				global abort_restore
 				if abort_restore:
-					print_message(source, tr('do_restore.abort'), tell=False)
+					print_message(source, tr('do_restart.abort'), tell=False)
 					return
 
 		source.get_server().stop()
 		server_inst.logger.info('Wait for server to stop')
 		source.get_server().wait_for_start()
-
+'''
 		server_inst.logger.info('Backup current world to avoid idiot')
 		overwrite_backup_path = os.path.join(config.backup_path, config.overwrite_backup_folder)
 		if os.path.exists(overwrite_backup_path):
@@ -387,10 +383,10 @@ def _do_restore_backup(source: CommandSource, slot: int):
 		remove_worlds(config.server_path)
 		server_inst.logger.info('Restore backup ' + slot_folder)
 		copy_worlds(slot_folder, config.server_path)
-
+'''
 		source.get_server().start()
 	except:
-		server_inst.logger.exception('Fail to restore backup to slot {}, triggered by {}'.format(slot, source))
+		server_inst.logger.exception('Fail to restart, triggered by {}'.format(source))
 	else:
 		source.get_server().dispatch_event(RESTORE_DONE_EVENT, (source, slot, slot_info))  # async dispatch
 
@@ -401,7 +397,7 @@ def trigger_abort(source: CommandSource):
 	slot_selected = None
 	print_message(source, tr('trigger_abort.abort'), tell=False)
 
-
+'''
 @new_thread('QBM - list')
 def list_backup(source: CommandSource, size_display: bool = None):
 	if size_display is None:
@@ -446,7 +442,7 @@ def list_backup(source: CommandSource, size_display: bool = None):
 	if size_display:
 		print_message(source, tr('list_backup.total_space', format_dir_size(backup_size)), prefix='')
 
-
+'''
 @new_thread('QBM - help')
 def print_help_message(source: CommandSource):
 	if source.is_player:
@@ -463,13 +459,9 @@ def print_help_message(source: CommandSource):
 			source,
 			tr('print_help.hotbar') +
 			'\n' +
-			RText(tr('print_help.click_to_create.text'))
-				.h(tr('print_help.click_to_create.hover'))
-				.c(RAction.suggest_command, tr('print_help.click_to_create.command', Prefix).to_plain_text()) +
-			'\n' +
-			RText(tr('print_help.click_to_restore.text'))
-				.h(tr('print_help.click_to_restore.hover'))
-				.c(RAction.suggest_command, tr('print_help.click_to_restore.command', Prefix).to_plain_text()),
+			RText(tr('print_help.click_to_restart.text'))
+				.h(tr('print_help.click_to_restart.hover'))
+				.c(RAction.suggest_command, tr('print_help.click_to_restart.command', Prefix).to_plain_text()),
 			prefix=''
 		)
 
@@ -499,7 +491,7 @@ def register_command(server: PluginServerInterface):
 
 	server.register_command(
 		Literal(Prefix).
-		runs(print_help_message).
+		runs(restart).
 		on_error(UnknownArgument, print_unknown_argument_message, handled=True).
 		then(
 			get_literal_node('make').
@@ -524,7 +516,7 @@ def register_command(server: PluginServerInterface):
 		).
 		then(get_literal_node('confirm').runs(confirm_restore)).
 		then(get_literal_node('abort').runs(trigger_abort)).
-		then(get_literal_node('list').runs(lambda src: list_backup(src))).
+		then(get_literal_node('help').runs(print_help_message).
 		then(get_literal_node('reload').runs(lambda src: load_config(src.get_server(), src)))
 	)
 
